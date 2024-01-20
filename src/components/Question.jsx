@@ -3,44 +3,47 @@ import questions from "../questions.js";
 import Answers from "./Answers.jsx";
 import QuestionTimer from "./QuestionTimer.jsx";
 
-export default function Question({
-    key,
-    questionText,
-    answers,
-    onSelectAnswer,
-    selectedAnswer,
-    answerState,
-    onSkipAnswer,
-}) {
-    const [answer, setAnswer] = useState({
-        selectedAnswer: "",
-        isCorrect: null,
+export default function Question({ index, onSelectAnswer, onSkipAnswer }) {
+  const [answer, setAnswer] = useState({
+    selectedAnswer: "",
+    isCorrect: null,
+  });
+
+  function handleSelectAnswer(answer) {
+    setAnswer({
+      selectedAnswer: answer,
+      isCorrect: null,
     });
 
-    function handleSelectAnswer(answer) {
-        setAnswer({
-            selectedAnswer: answer,
-            isCorrect: null,
-        });
+    setTimeout(() => {
+      setAnswer({
+        selectedAnswer: answer,
+        isCorrect: questions[index].answers[0] === answer,
+      });
 
-        setTimeout(() => {
-            setAnswer({
-                selectedAnswer: answer,
-                isCorrect: questions[key].answers[0] === answer,
-            });
-        }, 1000);
-    }
+      setTimeout(() => {
+        onSelectAnswer(answer);
+      }, 2000);
+    }, 1000);
+  }
 
-    return (
-        <div id="question">
-            <QuestionTimer timeout={10000} onTimeout={onSkipAnswer} />
-            <h2>{questionText}</h2>
-            <Answers
-                answers={answers}
-                selectedAnswer={selectedAnswer}
-                answerState={answerState}
-                onSelect={handleSelectAnswer}
-            />
-        </div>
-    );
+  let answerState = "";
+  if (answer.selectedAnswer && answer.isCorrect !== null) {
+    answerState = answer.isCorrect ? "correct" : "wrong";
+  } else if (answer.selectedAnswer) {
+    answerState = "answered";
+  }
+
+  return (
+    <div id="question">
+      <QuestionTimer timeout={10000} onTimeout={onSkipAnswer} />
+      <h2>{questions[index].text}</h2>
+      <Answers
+        answers={questions[index].answers}
+        selectedAnswer={answer.selectedAnswer}
+        answerState={answerState}
+        onSelect={handleSelectAnswer}
+      />
+    </div>
+  );
 }
